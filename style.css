@@ -44,6 +44,8 @@ h1 {
 }
 #todo-list {
     list-style: none;
+    padding-bottom: 50px; /* space for subtasks */
+    min-height: 100px;
 }
 .todo {
     display: flex;
