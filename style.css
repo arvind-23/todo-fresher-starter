@@ -50,6 +50,7 @@ h1 {
     align-items: center;
     padding: 0.5rem 0;
     border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
 }
 .todo.dragging {
     opacity: 0.5;
@@ -63,13 +64,18 @@ h1 {
 .todo .subtask-btn {
     margin-left: auto;
     margin-right: 0.5rem;
-    font-size: 1.2rem;
     cursor: pointer;
-}
-.todo .delete {
-    cursor: pointer;
-    color: #e00;
 }
 .subtask {
     margin-left: 2rem;
+    border-left: 2px solid #ccc;
+    padding-left: 1rem;
+    background: #fafafa;
+}
+.subtask .subtask-btn {
+    display: none;
+}
+.completed .text {
+    text-decoration: line-through;
+    color: #888;
 }
