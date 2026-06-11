@@ -6,6 +6,7 @@ const todos = []; // load from localStorage later
 const listEl = document.getElementById("todo-list");
 const inputEl = document.getElementById("new-todo");
 const templateEl = document.getElementById("todo-template"); //template for todo
+let filter = "all"; // all, active, completed
 
 // TODO: implement add, drag, filter, persistence, etc.
 
@@ -120,40 +121,66 @@ function moveTodo(dragId, dropId){
     render();
 }
 
+//Feature: Filtering using hash
+function handleHashChange(){
+    currentHash = window.location.hash.replace("#", "") || "all";
+    document.querySelectorAll(".filters button").forEach(btn => {
+        if(btn.dataset.filter === currentHash){
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+    render();
+}
+
+
 // Rendering function
 function render(){
     listEl.innerHTML = "";
     todos.forEach(todo => {
-        const todoEl = templateEl.content.cloneNode(true);
-        const li = todoEl.querySelector(".todo");
-        li.dataset.id = todo.id;
-        todoEl.querySelector(".text").textContent = todo.text;
+        const showTodo = (currentHash === "all") || 
+        (currentHash === "active" && !todo.completed) || 
+        (currentHash === "completed" && todo.completed);
 
-        if(todo.completed){
-            li.classList.add("completed");
-            li.querySelector(".toggle-btn").checked = true;
+        if(showTodo){
+            const todoEl = templateEl.content.cloneNode(true);
+            const li = todoEl.querySelector(".todo");
+            li.dataset.id = todo.id;
+            todoEl.querySelector(".text").textContent = todo.text;
+
+            if(todo.completed){
+                li.classList.add("completed");
+                li.querySelector(".toggle-btn").checked = true;
+            }
+            listEl.appendChild(todoEl);
         }
-        listEl.appendChild(todoEl);
         
         // Render subtasks
         todo.subtasks.forEach(subtask => {
-            const subNode = templateEl.content.cloneNode(true);
-            const subLi = subNode.querySelector(".todo");
-            
-            subLi.dataset.id = subtask.id;
-            subLi.classList.add("subtask"); // CSS handles the indentation!
-            subLi.querySelector(".text").textContent = subtask.text;
-            
-            if(subtask.completed){
-                subLi.classList.add("completed");
-                subLi.querySelector(".toggle-btn").checked = true;
+            const showSubtask = (currentHash === "all") || 
+            (currentHash === "active" && !subtask.completed) || 
+            (currentHash === "completed" && subtask.completed);
+
+            if(showSubtask){
+                const subNode = templateEl.content.cloneNode(true);
+                const subLi = subNode.querySelector(".todo");
+                
+                subLi.dataset.id = subtask.id;
+                subLi.classList.add("subtask");
+                subLi.querySelector(".text").textContent = subtask.text;
+                
+                if(subtask.completed){
+                    subLi.classList.add("completed");
+                    subLi.querySelector(".toggle-btn").checked = true;
+                }
+                listEl.appendChild(subNode);
             }
-            listEl.appendChild(subNode);
         });
     });
 }
 
-// Event listener for adding new todo
+// Event listeners for adding new todo and deleting todos
 inputEl.addEventListener("keypress", e => {
     if(e.key === "Enter" && inputEl.value.trim()){
         addTodo(inputEl.value.trim());
@@ -217,5 +244,18 @@ listEl.addEventListener("dragend", (e) => {
     }
     draggedId = null;
 });
+
+// Event listener for filtering
+window.addEventListener("hashchange", handleHashChange); // For Hash change
+window.addEventListener("DOMContentLoaded", handleHashChange); // For initial load
+
+document.querySelector(".filters").addEventListener("click", e => {
+    const btn = e.target.closest("BUTTON");
+    if(btn){
+        const filterValue = btn.dataset.filter;
+        window.location.hash = filterValue; // This will trigger handleHashChange
+    }
+});
+
 
 render(); // initial render
