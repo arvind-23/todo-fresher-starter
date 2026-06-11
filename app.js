@@ -27,6 +27,39 @@ function addSubtask(parentId, text){
     }
 }
 
+// Feature: Delete & Toggle
+function deleteTodo(id){
+    console.log("deleteTodo with ID:", id);
+    const mainIndex = todos.findIndex(t => t.id === id);
+    if(mainIndex !== -1){
+        console.log("Deleting main task at index:", mainIndex);
+        todos.splice(mainIndex, 1);
+    } else {
+        todos.forEach(t => {
+            const subIndex = t.subtasks.findIndex(s => s.id === id);
+            if(subIndex !== -1){
+                console.log("Deleting Subtask at id:", subIndex);
+                t.subtasks.splice(subIndex, 1);
+            }
+        });
+    }
+    render();
+}
+
+function toggleTodo(id){
+    const main = todos.find(t => t.id === id);
+    if(main){
+        main.completed = !main.completed;
+    } else {
+        todos.forEach(t => {
+            const sub = t.subtasks.find(s => s.id === id);
+            if(sub){
+                sub.completed = !sub.completed;
+            }
+        });
+    }
+    render();
+}
 
 //Feature: Drag & Drop
 let draggedId = null;
@@ -95,6 +128,11 @@ function render(){
         const li = todoEl.querySelector(".todo");
         li.dataset.id = todo.id;
         todoEl.querySelector(".text").textContent = todo.text;
+
+        if(todo.completed){
+            li.classList.add("completed");
+            li.querySelector(".toggle-btn").checked = true;
+        }
         listEl.appendChild(todoEl);
         
         // Render subtasks
@@ -106,6 +144,10 @@ function render(){
             subLi.classList.add("subtask"); // CSS handles the indentation!
             subLi.querySelector(".text").textContent = subtask.text;
             
+            if(subtask.completed){
+                subLi.classList.add("completed");
+                subLi.querySelector(".toggle-btn").checked = true;
+            }
             listEl.appendChild(subNode);
         });
     });
@@ -120,12 +162,29 @@ inputEl.addEventListener("keypress", e => {
 });
 
 listEl.addEventListener("click", e => {
-    if(e.target.classList.contains("subtask-btn")){
-        const parentId = e.target.closest(".todo").dataset.id;
-        const subtaskText = prompt("Subtask text:");
-        if(subtaskText){
-            addSubtask(parentId, subtaskText.trim());
+    const addBtn = e.target.closest(".subtask-btn");
+    const deleteBtn = e.target.closest(".delete-btn");
+
+    if (addBtn) {
+        const parentId = addBtn.closest(".todo").dataset.id;
+        const text = prompt("Enter subtask name:");
+        if (text && text.trim() !== "") {
+            addSubtask(parentId, text.trim());
         }
+    }
+    
+    if (deleteBtn) {
+        const id = deleteBtn.closest(".todo").dataset.id;
+        console.log("Delete button clicked for ID:", id);
+        deleteTodo(id);
+    }
+});
+
+// Eventhandlers for toggling
+listEl.addEventListener("change", e => {
+    if(e.target.classList.contains("toggle-btn")){
+        const id = e.target.closest(".todo").dataset.id;
+        toggleTodo(id);
     }
 });
 

@@ -63,10 +63,30 @@ h1 {
 .todo .text {
     flex: 1;
 }
-.todo .subtask-btn {
-    margin-left: auto;
-    margin-right: 0.5rem;
+.todo .subtask-btn, 
+.todo .delete-btn {
+    background: none;
+    border: none;
     cursor: pointer;
+    color: #444; /* Discrete grey by default */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+.todo button svg {
+    width: 16px;
+    height: 16px;
+}
+.todo .subtask-btn:hover {
+    color: #007bff;
+    background: #e0f0ff;
+}
+.todo .delete-btn:hover {
+    color: #dc3545;
+    background: #fdeaea;
 }
 .subtask {
     margin-left: 2rem;
@@ -74,7 +94,8 @@ h1 {
     padding-left: 1rem;
     background: #fafafa;
 }
-.subtask .subtask-btn {
+.subtask .subtask-btn, 
+.subtask .delete-btn {
     display: none;
 }
 .completed .text {
