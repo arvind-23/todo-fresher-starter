@@ -10,6 +10,7 @@ body {
 }
 .container {
     max-width: 600px;
+    width: 100%; /* Full width on smaller screens */
     margin: auto;
     background: #fff;
     border-radius: 8px;
@@ -62,6 +63,8 @@ h1 {
 }
 .todo .text {
     flex: 1;
+    margin-left: 0.5rem;
+    word-break: break-word;
 }
 .todo .subtask-btn, 
 .todo .delete-btn {
@@ -101,4 +104,30 @@ h1 {
 .completed .text {
     text-decoration: line-through;
     color: #888;
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 0;
+        border-radius: 0;
+        min-height: 100vh; /* Full height on mobile */
+    }
+    .todo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .todo .text {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    h1 {
+        font-size: 1.5rem;
+    }
+    .subtask {
+        margin-left: 1rem;
+    }
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+    }   
 }

@@ -2,22 +2,44 @@
 //  Your code starts here – keep it clean & modular
 // -------------------------------------------------
 
-const todos = []; // load from localStorage later
+const savedTodos = localStorage.getItem("todos");
+const todos = savedTodos ? JSON.parse(savedTodos) : []; // load from localStorage
+
 const listEl = document.getElementById("todo-list");
 const inputEl = document.getElementById("new-todo");
 const templateEl = document.getElementById("todo-template"); //template for todo
-let filter = "all"; // all, active, completed
+
+let draggedId = null;
+let currentHash = "all"; // all, active, completed
 
 // TODO: implement add, drag, filter, persistence, etc.
 
-// Feature: Add todos & subtasks
+// Utility function to generate unique IDs
 function makeId(){
     return Date.now().toString();
 }
 
+// Feature: Add todos & subtasks
 function addTodo(text, parentId = null){
     todos.push({ id: makeId(), text, parentId, subtasks: [] });
     render();
+}
+
+// Helper function for all DOM creation
+function createTodoElement(todo, isSubtask = false){
+    const todoEl = templateEl.content.cloneNode(true);
+    const li = todoEl.querySelector(".todo");
+    li.dataset.id = todo.id;
+    if(isSubtask){
+        li.classList.add("subtask");
+    }
+    todoEl.querySelector(".text").textContent = todo.text;
+
+    if(todo.completed){
+        li.classList.add("completed");
+        li.querySelector(".toggle-btn").checked = true;
+    }
+    return todoEl;
 }
 
 function addSubtask(parentId, text){
@@ -63,8 +85,6 @@ function toggleTodo(id){
 }
 
 //Feature: Drag & Drop
-let draggedId = null;
-
 function moveTodo(dragId, dropId){
     if(dragId === dropId) return; // no self-drop
 
@@ -135,8 +155,10 @@ function handleHashChange(){
 }
 
 
-// Rendering function
+// Rendering function - modified clean rendering with filtering logic
 function render(){
+    localStorage.setItem("todos", JSON.stringify(todos)); // save to localStorage
+
     listEl.innerHTML = "";
     todos.forEach(todo => {
         const showTodo = (currentHash === "all") || 
@@ -144,16 +166,7 @@ function render(){
         (currentHash === "completed" && todo.completed);
 
         if(showTodo){
-            const todoEl = templateEl.content.cloneNode(true);
-            const li = todoEl.querySelector(".todo");
-            li.dataset.id = todo.id;
-            todoEl.querySelector(".text").textContent = todo.text;
-
-            if(todo.completed){
-                li.classList.add("completed");
-                li.querySelector(".toggle-btn").checked = true;
-            }
-            listEl.appendChild(todoEl);
+            listEl.appendChild(createTodoElement(todo, false));
         }
         
         // Render subtasks
@@ -163,18 +176,7 @@ function render(){
             (currentHash === "completed" && subtask.completed);
 
             if(showSubtask){
-                const subNode = templateEl.content.cloneNode(true);
-                const subLi = subNode.querySelector(".todo");
-                
-                subLi.dataset.id = subtask.id;
-                subLi.classList.add("subtask");
-                subLi.querySelector(".text").textContent = subtask.text;
-                
-                if(subtask.completed){
-                    subLi.classList.add("completed");
-                    subLi.querySelector(".toggle-btn").checked = true;
-                }
-                listEl.appendChild(subNode);
+                listEl.appendChild(createTodoElement(subtask, true));
             }
         });
     });
@@ -255,6 +257,31 @@ document.querySelector(".filters").addEventListener("click", e => {
         const filterValue = btn.dataset.filter;
         window.location.hash = filterValue; // This will trigger handleHashChange
     }
+});
+
+// Handling Mobile Responsiveness
+listEl.addEventListener("touchstart", e => {
+    const itemEl = e.target.closest(".todo");
+    if(itemEl){
+        draggedId = itemEl.dataset.id;
+        itemEl.classList.add("dragging");
+    }
+},{ passive: true });
+
+listEl.addEventListener("touchmove", e => {
+    if(!draggedId) return;
+    e.preventDefault();
+},{ passive: false });
+
+listEl.addEventListener("touchend", e => {
+    if(!draggedId) return;
+    const touch = e.changedTouches[0];
+    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY)?.closest(".todo");
+    const dropId = targetEl ? targetEl.dataset.id : null;
+    moveTodo(draggedId, dropId);
+    const itemEls = document.querySelectorAll(".todo.dragging");
+    itemEls.forEach(el => el.classList.remove("dragging"));
+    draggedId = null;
 });
 
 
