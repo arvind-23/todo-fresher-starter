@@ -26,3 +26,9 @@ Project Link: https://arvind-23.github.io/todo-fresher-starter/
 
 ### 4. Mobile Responsiveness
 - Faced challenge to implement, tried to make sure some basic styling and listeners will help in it.
+
+---
+
+## Suggestions
+- Would like to try styling myself and add some animations next time.
+- A timeline feature for the todos will be interesting as well.
