@@ -84,6 +84,22 @@ function toggleTodo(id){
     render();
 }
 
+function editTodo(id, newText){
+    if(!newText || newText.trim() === "") return; // ignore empty edits
+    const main = todos.find(t => t.id === id);
+    if(main){
+        main.text = newText;
+    } else {
+        todos.forEach(t => {
+            const sub = t.subtasks.find(s => s.id === id);
+            if(sub){
+                sub.text = newText;
+            }
+        });
+    }
+    render();
+}
+
 //Feature: Drag & Drop
 function moveTodo(dragId, dropId){
     if(dragId === dropId) return; // no self-drop
@@ -142,18 +158,28 @@ function moveTodo(dragId, dropId){
 }
 
 //Feature: Filtering using hash
-function handleHashChange(){
-    currentHash = window.location.hash.replace("#", "") || "all";
-    document.querySelectorAll(".filters button").forEach(btn => {
-        if(btn.dataset.filter === currentHash){
-            btn.classList.add("active");
-        } else {
-            btn.classList.remove("active");
-        }
-    });
-    render();
-}
+// function handleHashChange(){
+//     currentHash = window.location.hash.replace("#", "") || "all";
+//     document.querySelectorAll(".filters button").forEach(btn => {
+//         if(btn.dataset.filter === currentHash){
+//             btn.classList.add("active");
+//         } else {
+//             btn.classList.remove("active");
+//         }
+//     });
+//     render();
+// }
 
+document.querySelector(".filters").addEventListener("click", e => {
+    const btn = e.target.closest("BUTTON");
+    if(btn){
+        currentHash = btn.dataset.filter;
+        document.querySelectorAll(".filters button").forEach(b => {
+            b.classList.toggle("active", b === btn);
+        });
+        render();
+    }
+});
 
 // Rendering function - modified clean rendering with filtering logic
 function render(){
@@ -247,6 +273,18 @@ listEl.addEventListener("dragend", (e) => {
     draggedId = null;
 });
 
+listEl.addEventListener("click", e => {
+    const editBtn = e.target.closest(".edit-btn");
+    if(editBtn){
+        const id = editBtn.closest(".todo").dataset.id;
+        const newText = prompt("Edit todo:", editBtn.closest(".todo").querySelector(".text").textContent);
+        if(newText && newText.trim() !== ""){
+            editTodo(id, newText.trim());
+        }
+    }
+});
+
+
 // Event listener for filtering
 window.addEventListener("hashchange", handleHashChange); // For Hash change
 window.addEventListener("DOMContentLoaded", handleHashChange); // For initial load
@@ -283,6 +321,7 @@ listEl.addEventListener("touchend", e => {
     itemEls.forEach(el => el.classList.remove("dragging"));
     draggedId = null;
 });
+
 
 
 render(); // initial render
